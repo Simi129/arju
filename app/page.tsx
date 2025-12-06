@@ -384,7 +384,7 @@ export default function Home() {
       </main>
 
       {/* ChatBot */}
-      <ChatBot language={language} />
+      <ChatBot />
     </div>
   );
 }

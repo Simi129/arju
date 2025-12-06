@@ -1,6 +1,102 @@
 export type Language = 'en' | 'ru' | 'lv';
 
-export const translations = {
+interface Translations {
+  nav: {
+    expertise: string;
+    solutions: string;
+    faq: string;
+  };
+  hero: {
+    status: string;
+    title1: string;
+    title2: string;
+    description: string;
+    cta: string;
+  };
+  services: {
+    automation: {
+      title: string;
+      description: string;
+    };
+    ai: {
+      title: string;
+      description: string;
+    };
+    marketing: {
+      title: string;
+      subtitle: string;
+      description: string;
+    };
+    marketingAutomation: {
+      title: string;
+      description: string;
+      integrations: string;
+    };
+  };
+  technologies: {
+    title: string;
+  };
+  stats: {
+    clients: string;
+    automated: string;
+    satisfaction: string;
+    clientsScaled: string;
+    hoursSaved: string;
+    systemUptime: string;
+    avgROI: string;
+  };
+  faq: {
+    title: string;
+    subtitle: string;
+    q1: {
+      question: string;
+      answer: string;
+    };
+    q2: {
+      question: string;
+      answer: string;
+    };
+    q3: {
+      question: string;
+      answer: string;
+    };
+    q4: {
+      question: string;
+      answer: string;
+    };
+  };
+  footer: {
+    description: string;
+    services: string;
+    servicesList: {
+      automation: string;
+      ai: string;
+      marketing: string;
+      consulting: string;
+    };
+    connect: string;
+    copyright: string;
+    privacy: string;
+    terms: string;
+  };
+  chat: {
+    title: string;
+    placeholder: string;
+    send: string;
+    minimize: string;
+    close: string;
+    openChat: string;
+    closeChat: string;
+    chatWithUs: string;
+    onlineNow: string;
+    welcomeMessage: string;
+    typeMessage: string;
+    sendMessage: string;
+    errorSending: string;
+  };
+}
+
+export const translations: Record<Language, Translations> = {
   en: {
     nav: {
       expertise: 'Expertise',
@@ -86,6 +182,14 @@ export const translations = {
       send: 'Send',
       minimize: 'Minimize',
       close: 'Close',
+      openChat: 'Open chat',
+      closeChat: 'Close chat',
+      chatWithUs: 'Chat with us',
+      onlineNow: 'We\'re online',
+      welcomeMessage: 'Hello! How can we help you today?',
+      typeMessage: 'Type your message...',
+      sendMessage: 'Send message',
+      errorSending: 'Failed to send message. Please try again.',
     },
   },
   ru: {
@@ -173,6 +277,14 @@ export const translations = {
       send: 'Отправить',
       minimize: 'Свернуть',
       close: 'Закрыть',
+      openChat: 'Открыть чат',
+      closeChat: 'Закрыть чат',
+      chatWithUs: 'Напишите нам',
+      onlineNow: 'Мы онлайн',
+      welcomeMessage: 'Здравствуйте! Чем мы можем вам помочь?',
+      typeMessage: 'Введите сообщение...',
+      sendMessage: 'Отправить сообщение',
+      errorSending: 'Не удалось отправить сообщение. Попробуйте снова.',
     },
   },
   lv: {
@@ -260,6 +372,14 @@ export const translations = {
       send: 'Nosūtīt',
       minimize: 'Minimizēt',
       close: 'Aizvērt',
+      openChat: 'Atvērt čatu',
+      closeChat: 'Aizvērt čatu',
+      chatWithUs: 'Sazinieties ar mums',
+      onlineNow: 'Mēs esam tiešsaistē',
+      welcomeMessage: 'Sveiki! Kā mēs varam jums palīdzēt?',
+      typeMessage: 'Ierakstiet ziņojumu...',
+      sendMessage: 'Nosūtīt ziņojumu',
+      errorSending: 'Neizdevās nosūtīt ziņojumu. Lūdzu, mēģiniet vēlreiz.',
     },
   },
 };

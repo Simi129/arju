@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
     messagesStore.set(userId, userMessages);
 
     console.log('Message stored successfully for userId:', userId);
+    console.log('Total messages for this user:', userMessages.length);
 
     return NextResponse.json({
       success: true,
@@ -55,6 +56,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
 
+    console.log('=== POLLING REQUEST ===');
+    console.log('UserId:', userId);
+
     if (!userId) {
       return NextResponse.json(
         { error: 'userId is required' },
@@ -65,9 +69,12 @@ export async function GET(request: NextRequest) {
     // Получаем сообщения для пользователя
     const messages = messagesStore.get(userId) || [];
     
+    console.log('Messages found:', messages.length);
+
     // Очищаем хранилище после получения
     if (messages.length > 0) {
       messagesStore.delete(userId);
+      console.log('Messages cleared for userId:', userId);
     }
 
     return NextResponse.json({

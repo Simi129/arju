@@ -1,144 +1,159 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Minimize2 } from 'lucide-react';
-import { translations, Language } from '../translations';
+import { useState, useEffect, useRef } from 'react';
+import { translations } from '../translations';
 
-interface ChatBotProps {
-  language: Language;
-}
-
-interface Message {
-  id: number;
+type Message = {
   text: string;
-  sender: 'user' | 'bot';
+  sender: 'user' | 'admin';
   timestamp: Date;
-}
+};
 
-export default function ChatBot({ language }: ChatBotProps) {
+type Language = 'en' | 'ru' | 'lv';
+
+export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 1,
-      text: language === 'ru' 
-        ? 'Здравствуйте! Чем могу помочь?' 
-        : language === 'lv'
-        ? 'Sveiki! Kā es varu palīdzēt?'
-        : 'Hello! How can I help you?',
-      sender: 'bot',
-      timestamp: new Date(),
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [userId] = useState(() => `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
+  const [userId, setUserId] = useState<string>('');
+  const [userName, setUserName] = useState('Website Visitor');
+  const [language, setLanguage] = useState<Language>('en');
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const t = translations[language];
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
+  // Генерация уникального ID пользователя
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    let id = localStorage.getItem('chatUserId');
+    if (!id) {
+      id = `user${Date.now()}${Math.random().toString(36).substr(2, 9)}`;
+      localStorage.setItem('chatUserId', id);
+    }
+    setUserId(id);
 
-  // 🆕 Polling для получения новых сообщений от оператора
+    // Загрузка сохраненных сообщений
+    const savedMessages = localStorage.getItem(`chatMessages_${id}`);
+    if (savedMessages) {
+      const parsed = JSON.parse(savedMessages);
+      setMessages(parsed.map((m: any) => ({
+        ...m,
+        timestamp: new Date(m.timestamp)
+      })));
+    }
+
+    // Определяем язык браузера
+    const browserLang = navigator.language.toLowerCase();
+    if (browserLang.startsWith('ru')) {
+      setLanguage('ru');
+    } else if (browserLang.startsWith('lv')) {
+      setLanguage('lv');
+    } else {
+      setLanguage('en');
+    }
+  }, []);
+
+  // POLLING - опрос сервера каждые 2 секунды для получения новых сообщений
   useEffect(() => {
-    if (!isOpen) return;
+    if (!userId || !isOpen) return;
 
-    const pollInterval = setInterval(async () => {
+    console.log('Starting polling for userId:', userId);
+
+    const interval = setInterval(async () => {
       try {
         const response = await fetch(`/api/chat/response?userId=${userId}`);
+        const data = await response.json();
         
-        if (response.ok) {
-          const data = await response.json();
+        if (data.success && data.messages && data.messages.length > 0) {
+          console.log('Received messages from server:', data.messages);
           
-          if (data.messages && data.messages.length > 0) {
-            // Добавляем новые сообщения от оператора
-            const newMessages = data.messages.map((msg: any, index: number) => ({
-              id: Date.now() + index,
-              text: msg.text,
-              sender: 'bot' as const,
-              timestamp: new Date(msg.timestamp),
-            }));
-            
-            setMessages((prev) => [...prev, ...newMessages]);
-          }
+          // Добавляем новые сообщения от admin в чат
+          data.messages.forEach((msg: any) => {
+            setMessages(prev => {
+              const newMessage = {
+                text: msg.text,
+                sender: 'admin' as const,
+                timestamp: new Date(msg.timestamp)
+              };
+              const updated = [...prev, newMessage];
+              
+              // Сохраняем в localStorage
+              localStorage.setItem(`chatMessages_${userId}`, JSON.stringify(updated));
+              
+              return updated;
+            });
+          });
         }
       } catch (error) {
         console.error('Error polling messages:', error);
       }
-    }, 3000); // Проверяем каждые 3 секунды
+    }, 2000); // опрос каждые 2 секунды
 
-    return () => clearInterval(pollInterval);
-  }, [isOpen, userId]);
+    return () => {
+      console.log('Stopping polling');
+      clearInterval(interval);
+    };
+  }, [userId, isOpen]);
+
+  // Автоскролл к последнему сообщению
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const t = translations[language];
 
   const handleSend = async () => {
-    if (!inputValue.trim() || isLoading) return;
+    if (!inputValue.trim()) return;
 
     const userMessage: Message = {
-      id: messages.length + 1,
       text: inputValue,
       sender: 'user',
       timestamp: new Date(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
-    const messageText = inputValue;
+    setMessages(prev => {
+      const updated = [...prev, userMessage];
+      localStorage.setItem(`chatMessages_${userId}`, JSON.stringify(updated));
+      return updated;
+    });
+    
     setInputValue('');
     setIsLoading(true);
 
     try {
-      // Отправляем сообщение в n8n
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: messageText,
+          message: inputValue,
           userId: userId,
-          userName: 'Website Visitor',
+          userName: userName,
           language: language,
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to send message');
+        throw new Error(data.error || 'Failed to send message');
       }
 
-      // Показываем сообщение о том, что сообщение отправлено
-      const botMessage: Message = {
-        id: messages.length + 2,
-        text: language === 'ru'
-          ? 'Спасибо за ваше сообщение! Наш специалист получил его и ответит вам в ближайшее время.'
-          : language === 'lv'
-          ? 'Paldies par jūsu ziņojumu! Mūsu speciālists to saņēma un atbildēs tuvākajā laikā.'
-          : 'Thank you for your message! Our specialist received it and will reply shortly.',
-        sender: 'bot',
-        timestamp: new Date(),
-      };
-      
-      setMessages((prev) => [...prev, botMessage]);
+      console.log('Message sent successfully:', data);
 
     } catch (error) {
       console.error('Error sending message:', error);
       
-      // Показываем сообщение об ошибке
       const errorMessage: Message = {
-        id: messages.length + 2,
-        text: language === 'ru'
-          ? 'Извините, произошла ошибка. Пожалуйста, попробуйте позже.'
-          : language === 'lv'
-          ? 'Atvainojiet, radās kļūda. Lūdzu, mēģiniet vēlāk.'
-          : 'Sorry, an error occurred. Please try again later.',
-        sender: 'bot',
+        text: t.chat.errorSending,
+        sender: 'admin',
         timestamp: new Date(),
       };
       
-      setMessages((prev) => [...prev, errorMessage]);
+      setMessages(prev => {
+        const updated = [...prev, errorMessage];
+        localStorage.setItem(`chatMessages_${userId}`, JSON.stringify(updated));
+        return updated;
+      });
     } finally {
       setIsLoading(false);
     }
@@ -151,143 +166,165 @@ export default function ChatBot({ language }: ChatBotProps) {
     }
   };
 
-  if (!isOpen) {
-    return (
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 group"
-      >
-        <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full blur-lg opacity-75 group-hover:opacity-100 transition-opacity"></div>
-          <div className="relative flex items-center justify-center w-16 h-16 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full shadow-2xl hover:scale-110 transition-transform duration-300">
-            <MessageCircle className="w-7 h-7 text-white" />
-          </div>
-          <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-neutral-950 animate-pulse"></div>
-        </div>
-      </button>
-    );
-  }
-
   return (
-    <div
-      className={`fixed bottom-6 right-6 z-50 transition-all duration-300 ${
-        isMinimized ? 'w-80' : 'w-96'
-      }`}
-    >
-      <div
-        className={`bg-neutral-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 ${
-          isMinimized ? 'h-16' : 'h-[600px]'
-        }`}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-white/10 bg-gradient-to-r from-indigo-600/20 to-purple-600/20">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="w-10 h-10 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full flex items-center justify-center">
-                <MessageCircle className="w-5 h-5 text-white" />
-              </div>
-              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-neutral-900"></div>
-            </div>
-            <div>
-              <h3 className="text-white font-semibold text-sm">{t.chat.title}</h3>
-              <p className="text-neutral-400 text-xs">
-                {language === 'ru' ? 'Обычно отвечаем за 2 мин' : language === 'lv' ? 'Parasti atbildam 2 min laikā' : 'Usually replies in 2 min'}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setIsMinimized(!isMinimized)}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-              title={t.chat.minimize}
-            >
-              <Minimize2 className="w-4 h-4 text-neutral-400" />
-            </button>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-              title={t.chat.close}
-            >
-              <X className="w-4 h-4 text-neutral-400" />
-            </button>
-          </div>
-        </div>
+    <>
+      {/* Floating Button */}
+      {!isOpen && (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all duration-300 z-50"
+          aria-label={t.chat.openChat}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+            className="w-6 h-6"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"
+            />
+          </svg>
+        </button>
+      )}
 
-        {!isMinimized && (
-          <>
-            {/* Messages */}
-            <div className="h-[calc(100%-8rem)] overflow-y-auto p-4 space-y-4 no-scrollbar">
-              {messages.map((message) => (
+      {/* Chat Window */}
+      {isOpen && (
+        <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-white rounded-2xl shadow-2xl flex flex-col z-50 border border-gray-200">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 rounded-t-2xl flex justify-between items-center">
+            <div>
+              <h3 className="font-semibold text-lg">{t.chat.chatWithUs}</h3>
+              <p className="text-xs text-blue-100">{t.chat.onlineNow}</p>
+            </div>
+            <div className="flex gap-2 items-center">
+              {/* Language Selector */}
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as Language)}
+                className="bg-blue-500 text-white text-sm rounded px-2 py-1 border-none outline-none cursor-pointer"
+              >
+                <option value="en">EN</option>
+                <option value="ru">RU</option>
+                <option value="lv">LV</option>
+              </select>
+              
+              <button
+                onClick={() => setIsOpen(false)}
+                className="text-white hover:bg-blue-500 rounded-full p-1 transition-colors"
+                aria-label={t.chat.closeChat}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="w-6 h-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+            {messages.length === 0 && (
+              <div className="text-center text-gray-500 mt-8">
+                <p>{t.chat.welcomeMessage}</p>
+              </div>
+            )}
+            
+            {messages.map((msg, index) => (
+              <div
+                key={index}
+                className={`flex ${
+                  msg.sender === 'user' ? 'justify-end' : 'justify-start'
+                }`}
+              >
                 <div
-                  key={message.id}
-                  className={`flex ${
-                    message.sender === 'user' ? 'justify-end' : 'justify-start'
+                  className={`max-w-[75%] rounded-2xl px-4 py-2 ${
+                    msg.sender === 'user'
+                      ? 'bg-blue-600 text-white rounded-br-none'
+                      : 'bg-white text-gray-800 rounded-bl-none shadow-sm border border-gray-200'
                   }`}
                 >
-                  <div
-                    className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${
-                      message.sender === 'user'
-                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white'
-                        : 'bg-neutral-800 text-neutral-200'
+                  <p className="text-sm whitespace-pre-wrap break-words">{msg.text}</p>
+                  <p
+                    className={`text-xs mt-1 ${
+                      msg.sender === 'user' ? 'text-blue-100' : 'text-gray-400'
                     }`}
                   >
-                    <p className="text-sm">{message.text}</p>
-                    <p
-                      className={`text-xs mt-1 ${
-                        message.sender === 'user'
-                          ? 'text-indigo-200'
-                          : 'text-neutral-500'
-                      }`}
-                    >
-                      {message.timestamp.toLocaleTimeString(language, {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </p>
-                  </div>
+                    {msg.timestamp.toLocaleTimeString(language, {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </p>
                 </div>
-              ))}
-              
-              {/* Loading indicator */}
-              {isLoading && (
-                <div className="flex justify-start">
-                  <div className="bg-neutral-800 rounded-2xl px-4 py-2.5">
-                    <div className="flex gap-1">
-                      <div className="w-2 h-2 bg-neutral-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                      <div className="w-2 h-2 bg-neutral-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                      <div className="w-2 h-2 bg-neutral-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* Input */}
-            <div className="p-4 border-t border-white/10 bg-neutral-900/50">
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder={t.chat.placeholder}
-                  disabled={isLoading}
-                  className="flex-1 bg-neutral-800 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all disabled:opacity-50"
-                />
-                <button
-                  onClick={handleSend}
-                  disabled={!inputValue.trim() || isLoading}
-                  className="p-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl hover:scale-105 active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                >
-                  <Send className="w-5 h-5 text-white" />
-                </button>
               </div>
+            ))}
+            
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="bg-white text-gray-800 rounded-2xl rounded-bl-none px-4 py-2 shadow-sm border border-gray-200">
+                  <div className="flex space-x-2">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100"></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200"></div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input */}
+          <div className="p-4 bg-white border-t border-gray-200 rounded-b-2xl">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder={t.chat.typeMessage}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={isLoading}
+              />
+              <button
+                onClick={handleSend}
+                disabled={isLoading || !inputValue.trim()}
+                className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-full p-2 transition-colors"
+                aria-label={t.chat.sendMessage}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="w-6 h-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
+                  />
+                </svg>
+              </button>
             </div>
-          </>
-        )}
-      </div>
-    </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
