@@ -2,17 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import { Menu, Globe, ChevronDown, X } from 'lucide-react';
-import { Language, languageNames, languageFlags, translations } from '../translations';
+import { Language, languageNames, languageFlags } from '../../locales';
+import { NavigationTranslations } from '../../types/translations';
 
 interface NavigationProps {
   language: Language;
   setLanguage: (lang: Language) => void;
+  translations: NavigationTranslations;
 }
 
-export default function Navigation({ language, setLanguage }: NavigationProps) {
+export default function Navigation({ language, setLanguage, translations }: NavigationProps) {
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const t = translations[language];
 
   const languages: Language[] = ['en', 'ru', 'lv'];
 
@@ -63,17 +64,17 @@ export default function Navigation({ language, setLanguage }: NavigationProps) {
           <ul className="hidden lg:flex items-center gap-8 px-8">
             <li>
               <a href="#expertise" className="text-sm font-medium text-neutral-400 hover:text-white transition-colors">
-                {t.nav.expertise}
+                {translations.expertise}
               </a>
             </li>
             <li>
               <a href="#solutions" className="text-sm font-medium text-neutral-400 hover:text-white transition-colors">
-                {t.nav.solutions}
+                {translations.solutions}
               </a>
             </li>
             <li>
               <a href="#faq" className="text-sm font-medium text-neutral-400 hover:text-white transition-colors">
-                {t.nav.faq}
+                {translations.faq}
               </a>
             </li>
           </ul>
@@ -102,9 +103,7 @@ export default function Navigation({ language, setLanguage }: NavigationProps) {
                   onClick={() => setIsLanguageOpen(false)}
                 ></div>
                 <div className="absolute right-0 mt-2 w-48 rounded-2xl shadow-2xl overflow-hidden z-[110] animate-slideDown">
-                  {/* Liquid Glass Effect Container */}
                   <div className="relative bg-neutral-900/40 backdrop-blur-2xl border border-white/10">
-                    {/* Glass shine effect */}
                     <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent pointer-events-none"></div>
                     
                     {languages.map((lang, index) => (
@@ -121,7 +120,6 @@ export default function Navigation({ language, setLanguage }: NavigationProps) {
                             : 'text-neutral-400 hover:text-white'
                         }`}
                       >
-                        {/* Hover glass effect */}
                         <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/5 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         
                         <span className="text-xl relative z-10">{languageFlags[lang]}</span>
@@ -143,30 +141,23 @@ export default function Navigation({ language, setLanguage }: NavigationProps) {
       {/* Mobile Menu Overlay & Menu */}
       {isMobileMenuOpen && (
         <>
-          {/* Backdrop with blur */}
           <div
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] animate-fadeIn"
             onClick={() => setIsMobileMenuOpen(false)}
           ></div>
 
-          {/* Mobile Menu - Liquid Glass Effect */}
           <div className="fixed top-[88px] left-4 right-4 z-[95] animate-slideDown">
             <div className="max-w-5xl mx-auto rounded-3xl overflow-hidden shadow-2xl">
-              {/* Liquid Glass Container */}
               <div className="relative bg-neutral-900/40 backdrop-blur-2xl border border-white/10">
-                {/* Animated gradient background */}
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-transparent pointer-events-none animate-pulse"></div>
-                
-                {/* Glass shine effect */}
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent pointer-events-none"></div>
                 
-                {/* Content */}
                 <div className="relative p-6">
                   <ul className="space-y-2">
                     {[
-                      { href: '#expertise', label: t.nav.expertise },
-                      { href: '#solutions', label: t.nav.solutions },
-                      { href: '#faq', label: t.nav.faq },
+                      { href: '#expertise', label: translations.expertise },
+                      { href: '#solutions', label: translations.solutions },
+                      { href: '#faq', label: translations.faq },
                     ].map((item, index) => (
                       <li key={item.href} style={{ animationDelay: `${index * 80}ms` }} className="animate-fadeInItem">
                         <a
@@ -174,7 +165,6 @@ export default function Navigation({ language, setLanguage }: NavigationProps) {
                           className="block py-4 px-6 text-base font-medium text-neutral-300 hover:text-white transition-all duration-300 rounded-2xl hover:bg-white/5 group relative overflow-hidden"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
-                          {/* Hover shimmer effect */}
                           <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
                           
                           <span className="relative z-10 flex items-center gap-3">

@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { MessageCircle, X, Send } from 'lucide-react';
-import { translations, Language } from '../translations';
+import { Language } from '../../locales';
+import { ChatTranslations } from '../../types/translations';
 
 type Message = {
   text: string;
@@ -12,15 +13,16 @@ type Message = {
 
 interface ChatBotProps {
   language: Language;
+  translations: ChatTranslations;
 }
 
-export default function ChatBot({ language }: ChatBotProps) {
+export default function ChatBot({ language, translations }: ChatBotProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [userId, setUserId] = useState<string>('');
-  const [userName, setUserName] = useState('Website Visitor');
+  const [userName] = useState('Website Visitor');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Генерация уникального ID пользователя
@@ -47,16 +49,12 @@ export default function ChatBot({ language }: ChatBotProps) {
   useEffect(() => {
     if (!userId || !isOpen) return;
 
-    console.log('Starting polling for userId:', userId);
-
     const interval = setInterval(async () => {
       try {
         const response = await fetch(`/api/chat/response?userId=${userId}`);
         const data = await response.json();
         
         if (data.success && data.messages && data.messages.length > 0) {
-          console.log('Received messages from server:', data.messages);
-          
           // Добавляем новые сообщения от admin в чат
           data.messages.forEach((msg: any) => {
             setMessages(prev => {
@@ -77,20 +75,15 @@ export default function ChatBot({ language }: ChatBotProps) {
       } catch (error) {
         console.error('Error polling messages:', error);
       }
-    }, 2000); // опрос каждые 2 секунды
+    }, 2000);
 
-    return () => {
-      console.log('Stopping polling');
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, [userId, isOpen]);
 
   // Автоскролл к последнему сообщению
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
-
-  const t = translations[language];
 
   const handleSend = async () => {
     if (!inputValue.trim()) return;
@@ -130,13 +123,11 @@ export default function ChatBot({ language }: ChatBotProps) {
         throw new Error(data.error || 'Failed to send message');
       }
 
-      console.log('Message sent successfully:', data);
-
     } catch (error) {
       console.error('Error sending message:', error);
       
       const errorMessage: Message = {
-        text: t.chat.errorSending,
+        text: translations.errorSending,
         sender: 'admin',
         timestamp: new Date(),
       };
@@ -163,7 +154,7 @@ export default function ChatBot({ language }: ChatBotProps) {
       <button
         onClick={() => setIsOpen(true)}
         className="fixed bottom-6 right-6 z-50 group"
-        aria-label={t.chat.openChat}
+        aria-label={translations.openChat}
       >
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full blur-lg opacity-75 group-hover:opacity-100 transition-opacity"></div>
@@ -189,14 +180,14 @@ export default function ChatBot({ language }: ChatBotProps) {
               <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-neutral-900"></div>
             </div>
             <div>
-              <h3 className="text-white font-semibold text-sm">{t.chat.chatWithUs}</h3>
-              <p className="text-neutral-400 text-xs">{t.chat.onlineNow}</p>
+              <h3 className="text-white font-semibold text-sm">{translations.chatWithUs}</h3>
+              <p className="text-neutral-400 text-xs">{translations.onlineNow}</p>
             </div>
           </div>
           <button
             onClick={() => setIsOpen(false)}
             className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-            aria-label={t.chat.closeChat}
+            aria-label={translations.closeChat}
           >
             <X className="w-4 h-4 text-neutral-400" />
           </button>
@@ -209,7 +200,7 @@ export default function ChatBot({ language }: ChatBotProps) {
               <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-full flex items-center justify-center">
                 <MessageCircle className="w-8 h-8 text-indigo-400" />
               </div>
-              <p className="text-sm">{t.chat.welcomeMessage}</p>
+              <p className="text-sm">{translations.welcomeMessage}</p>
             </div>
           )}
 
@@ -267,7 +258,7 @@ export default function ChatBot({ language }: ChatBotProps) {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder={t.chat.typeMessage}
+              placeholder={translations.typeMessage}
               className="flex-1 bg-neutral-800 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
               disabled={isLoading}
             />
@@ -275,7 +266,7 @@ export default function ChatBot({ language }: ChatBotProps) {
               onClick={handleSend}
               disabled={isLoading || !inputValue.trim()}
               className="p-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl hover:scale-105 active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-              aria-label={t.chat.sendMessage}
+              aria-label={translations.sendMessage}
             >
               <Send className="w-5 h-5 text-white" />
             </button>
