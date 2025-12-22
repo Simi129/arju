@@ -10,12 +10,9 @@ interface HeroSectionProps {
 export default function HeroSection({ translations }: HeroSectionProps) {
   return (
     <article className="relative group col-span-1 md:col-span-2 row-span-2 rounded-[2rem] overflow-hidden border border-white/10 bg-neutral-900/50 hover:border-white/20 transition-all duration-500 slide-up animate-delay-100">
+      {/* Оптимизированное фоновое изображение - маленькое для мобильных, большое для десктопа */}
       <div
-        className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105 opacity-60"
-        style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1639322537228-f710d846310a?q=80&w=2832&auto=format&fit=crop')",
-        }}
+        className="absolute inset-0 bg-cover bg-center transition-transform duration-700 md:group-hover:scale-105 opacity-60 bg-[url('https://images.unsplash.com/photo-1639322537228-f710d846310a?q=60&w=800&auto=format&fit=crop')] md:bg-[url('https://images.unsplash.com/photo-1639322537228-f710d846310a?q=80&w=2000&auto=format&fit=crop')]"
       ></div>
       <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent"></div>
 

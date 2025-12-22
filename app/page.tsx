@@ -16,11 +16,13 @@ export default function Home() {
 
   return (
     <div className="min-h-full">
-      {/* Ambient Background */}
+      {/* Ambient Background - Оптимизировано для мобильных */}
       <div className="fixed top-0 w-full h-screen -z-10 bg-neutral-950">
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-soft-light"></div>
-        <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[120px] mix-blend-screen animate-pulse duration-1000"></div>
-        <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[100px] mix-blend-screen"></div>
+        {/* Убрали grainy texture для мобильных */}
+        <div className="hidden md:block absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-soft-light"></div>
+        {/* Уменьшили blur для мобильных */}
+        <div className="absolute top-[-20%] right-[-10%] w-[400px] h-[400px] md:w-[600px] md:h-[600px] bg-indigo-600/20 rounded-full blur-[40px] md:blur-[120px] mix-blend-screen animate-pulse duration-1000"></div>
+        <div className="absolute bottom-[-10%] left-[-10%] w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-purple-600/10 rounded-full blur-[30px] md:blur-[100px] mix-blend-screen"></div>
       </div>
 
       {/* Navigation */}
