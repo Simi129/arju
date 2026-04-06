@@ -1,0 +1,31 @@
+import { ContactTranslations } from '../../types/translations';
+
+export const contactRu: ContactTranslations = {
+  title: 'Связаться с нами',
+  subtitle: 'Расскажите о своём проекте — мы ответим в течение 24 часов.',
+  firstName: 'Имя',
+  firstNamePlaceholder: 'Иван',
+  lastName: 'Фамилия',
+  lastNamePlaceholder: 'Иванов',
+  email: 'Email',
+  emailPlaceholder: 'ivan@company.com',
+  company: 'Компания',
+  companyPlaceholder: 'Ваша компания (необязательно)',
+  topic: 'Тема обращения',
+  topicPlaceholder: 'Выберите тему...',
+  topics: [
+    { value: 'automation', label: 'Автоматизация процессов', icon: '⚙️' },
+    { value: 'ai', label: 'Интеграция AI', icon: '🤖' },
+    { value: 'marketing', label: 'Маркетинговая автоматизация', icon: '📣' },
+    { value: 'consulting', label: 'Общий консалтинг', icon: '💼' },
+    { value: 'partnership', label: 'Партнёрство', icon: '🤝' },
+    { value: 'other', label: 'Другое', icon: '💬' },
+  ],
+  message: 'Сообщение',
+  messagePlaceholder: 'Расскажите о проекте, целях или задайте любые вопросы...',
+  send: 'Отправить',
+  sending: 'Отправка...',
+  required: '* Обязательные поля',
+  successMessage: 'Ваше сообщение отправлено! Мы свяжемся с вами в течение 24 часов.',
+  errorMessage: 'Что-то пошло не так. Попробуйте ещё раз или напишите нам напрямую.',
+};

@@ -4,6 +4,7 @@ export interface NavigationTranslations {
   expertise: string;
   solutions: string;
   faq: string;
+  contact: string;
 }
 
 export interface HeroTranslations {
@@ -93,6 +94,35 @@ export interface ChatTranslations {
   errorSending: string;
 }
 
+export interface ContactTopic {
+  value: string;
+  label: string;
+  icon: string;
+}
+
+export interface ContactTranslations {
+  title: string;
+  subtitle: string;
+  firstName: string;
+  firstNamePlaceholder: string;
+  lastName: string;
+  lastNamePlaceholder: string;
+  email: string;
+  emailPlaceholder: string;
+  company: string;
+  companyPlaceholder: string;
+  topic: string;
+  topicPlaceholder: string;
+  topics: ContactTopic[];
+  message: string;
+  messagePlaceholder: string;
+  send: string;
+  sending: string;
+  required: string;
+  successMessage: string;
+  errorMessage: string;
+}
+
 export interface Translations {
   nav: NavigationTranslations;
   hero: HeroTranslations;
@@ -102,4 +132,5 @@ export interface Translations {
   faq: FAQTranslations;
   footer: FooterTranslations;
   chat: ChatTranslations;
+  contact: ContactTranslations;
 }

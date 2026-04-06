@@ -7,6 +7,7 @@ import { statsRu } from './stats';
 import { faqRu } from './faq';
 import { footerRu } from './footer';
 import { chatRu } from './chat';
+import { contactRu } from './contact.ru';
 
 export const ru: Translations = {
   nav: navigationRu,
@@ -17,4 +18,5 @@ export const ru: Translations = {
   faq: faqRu,
   footer: footerRu,
   chat: chatRu,
+  contact: contactRu,
 };

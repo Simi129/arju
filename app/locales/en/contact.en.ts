@@ -1,0 +1,31 @@
+import { ContactTranslations } from '../../types/translations';
+
+export const contactEn: ContactTranslations = {
+  title: 'Get in Touch',
+  subtitle: "Tell us about your project and we'll get back to you within 24 hours.",
+  firstName: 'First Name',
+  firstNamePlaceholder: 'John',
+  lastName: 'Last Name',
+  lastNamePlaceholder: 'Doe',
+  email: 'Email',
+  emailPlaceholder: 'john@company.com',
+  company: 'Company',
+  companyPlaceholder: 'Your company (optional)',
+  topic: 'Topic',
+  topicPlaceholder: 'Select a topic...',
+  topics: [
+    { value: 'automation', label: 'Workflow Automation', icon: '⚙️' },
+    { value: 'ai', label: 'AI Integration', icon: '🤖' },
+    { value: 'marketing', label: 'Marketing Automation', icon: '📣' },
+    { value: 'consulting', label: 'General Consulting', icon: '💼' },
+    { value: 'partnership', label: 'Partnership', icon: '🤝' },
+    { value: 'other', label: 'Other', icon: '💬' },
+  ],
+  message: 'Message',
+  messagePlaceholder: 'Tell us about your project, goals, or any questions you have...',
+  send: 'Send Message',
+  sending: 'Sending...',
+  required: '* Required fields',
+  successMessage: "Your message has been sent! We'll get back to you within 24 hours.",
+  errorMessage: 'Something went wrong. Please try again or contact us directly.',
+};

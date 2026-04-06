@@ -7,6 +7,7 @@ import { statsLv } from './stats';
 import { faqLv } from './faq';
 import { footerLv } from './footer';
 import { chatLv } from './chat';
+import { contactLv } from './contact.lv';
 
 export const lv: Translations = {
   nav: navigationLv,
@@ -17,4 +18,5 @@ export const lv: Translations = {
   faq: faqLv,
   footer: footerLv,
   chat: chatLv,
+  contact: contactLv,
 };

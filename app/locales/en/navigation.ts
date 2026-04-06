@@ -4,4 +4,5 @@ export const navigationEn: NavigationTranslations = {
   expertise: 'Expertise',
   solutions: 'Solutions',
   faq: 'FAQ',
+  contact: 'Contact',
 };

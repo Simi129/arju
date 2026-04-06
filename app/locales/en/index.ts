@@ -7,6 +7,7 @@ import { statsEn } from './stats';
 import { faqEn } from './faq';
 import { footerEn } from './footer';
 import { chatEn } from './chat';
+import { contactEn } from './contact.en';
 
 export const en: Translations = {
   nav: navigationEn,
@@ -17,4 +18,5 @@ export const en: Translations = {
   faq: faqEn,
   footer: footerEn,
   chat: chatEn,
+  contact: contactEn,
 };

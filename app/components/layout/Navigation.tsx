@@ -17,14 +17,12 @@ export default function Navigation({ language, setLanguage, translations }: Navi
 
   const languages: Language[] = ['en', 'ru', 'lv'];
 
-  // Close mobile menu when language selector opens
   useEffect(() => {
     if (isLanguageOpen && isMobileMenuOpen) {
       setIsMobileMenuOpen(false);
     }
   }, [isLanguageOpen, isMobileMenuOpen]);
 
-  // Prevent body scroll when mobile menu is open
   useEffect(() => {
     if (isMobileMenuOpen) {
       document.body.style.overflow = 'hidden';
@@ -35,6 +33,13 @@ export default function Navigation({ language, setLanguage, translations }: Navi
       document.body.style.overflow = 'unset';
     };
   }, [isMobileMenuOpen]);
+
+  const navLinks = [
+    { href: '#expertise', label: translations.expertise },
+    { href: '#solutions', label: translations.solutions },
+    { href: '#faq', label: translations.faq },
+    { href: '#contact', label: translations.contact },
+  ];
 
   return (
     <>
@@ -62,21 +67,20 @@ export default function Navigation({ language, setLanguage, translations }: Navi
           </button>
 
           <ul className="hidden lg:flex items-center gap-8 px-8">
-            <li>
-              <a href="#expertise" className="text-sm font-medium text-neutral-400 hover:text-white transition-colors">
-                {translations.expertise}
-              </a>
-            </li>
-            <li>
-              <a href="#solutions" className="text-sm font-medium text-neutral-400 hover:text-white transition-colors">
-                {translations.solutions}
-              </a>
-            </li>
-            <li>
-              <a href="#faq" className="text-sm font-medium text-neutral-400 hover:text-white transition-colors">
-                {translations.faq}
-              </a>
-            </li>
+            {navLinks.map((item) => (
+              <li key={item.href}>
+                <a
+                  href={item.href}
+                  className={`text-sm font-medium transition-colors ${
+                    item.href === '#contact'
+                      ? 'text-indigo-400 hover:text-indigo-300'
+                      : 'text-neutral-400 hover:text-white'
+                  }`}
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))}
           </ul>
 
           {/* Language Selector */}
@@ -95,7 +99,6 @@ export default function Navigation({ language, setLanguage, translations }: Navi
               </span>
             </button>
 
-            {/* Language Dropdown */}
             {isLanguageOpen && (
               <>
                 <div
@@ -121,10 +124,8 @@ export default function Navigation({ language, setLanguage, translations }: Navi
                         }`}
                       >
                         <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/5 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        
                         <span className="text-xl relative z-10">{languageFlags[lang]}</span>
                         <span className="text-sm font-medium relative z-10">{languageNames[lang]}</span>
-                        
                         {language === lang && (
                           <span className="ml-auto text-indigo-400 relative z-10">✓</span>
                         )}
@@ -138,7 +139,7 @@ export default function Navigation({ language, setLanguage, translations }: Navi
         </nav>
       </header>
 
-      {/* Mobile Menu Overlay & Menu */}
+      {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <>
           <div
@@ -154,19 +155,16 @@ export default function Navigation({ language, setLanguage, translations }: Navi
                 
                 <div className="relative p-6">
                   <ul className="space-y-2">
-                    {[
-                      { href: '#expertise', label: translations.expertise },
-                      { href: '#solutions', label: translations.solutions },
-                      { href: '#faq', label: translations.faq },
-                    ].map((item, index) => (
+                    {navLinks.map((item, index) => (
                       <li key={item.href} style={{ animationDelay: `${index * 80}ms` }} className="animate-fadeInItem">
                         <a
                           href={item.href}
-                          className="block py-4 px-6 text-base font-medium text-neutral-300 hover:text-white transition-all duration-300 rounded-2xl hover:bg-white/5 group relative overflow-hidden"
+                          className={`block py-4 px-6 text-base font-medium transition-all duration-300 rounded-2xl hover:bg-white/5 group relative overflow-hidden ${
+                            item.href === '#contact' ? 'text-indigo-400 hover:text-indigo-300' : 'text-neutral-300 hover:text-white'
+                          }`}
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
-                          
                           <span className="relative z-10 flex items-center gap-3">
                             <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                             {item.label}
@@ -184,48 +182,20 @@ export default function Navigation({ language, setLanguage, translations }: Navi
 
       <style jsx>{`
         @keyframes slideDown {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-
         @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
-
         @keyframes fadeInItem {
-          from {
-            opacity: 0;
-            transform: translateX(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
+          from { opacity: 0; transform: translateX(-10px); }
+          to { opacity: 1; transform: translateX(0); }
         }
-
-        .animate-slideDown {
-          animation: slideDown 0.3s ease-out forwards;
-        }
-
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out forwards;
-        }
-
-        .animate-fadeInItem {
-          animation: fadeInItem 0.4s ease-out forwards;
-          opacity: 0;
-        }
+        .animate-slideDown { animation: slideDown 0.3s ease-out forwards; }
+        .animate-fadeIn { animation: fadeIn 0.3s ease-out forwards; }
+        .animate-fadeInItem { animation: fadeInItem 0.4s ease-out forwards; opacity: 0; }
       `}</style>
     </>
   );

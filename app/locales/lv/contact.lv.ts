@@ -1,0 +1,31 @@
+import { ContactTranslations } from '../../types/translations';
+
+export const contactLv: ContactTranslations = {
+  title: 'Sazināties ar mums',
+  subtitle: 'Pastāstiet par savu projektu — mēs atbildēsim 24 stundu laikā.',
+  firstName: 'Vārds',
+  firstNamePlaceholder: 'Jānis',
+  lastName: 'Uzvārds',
+  lastNamePlaceholder: 'Bērziņš',
+  email: 'E-pasts',
+  emailPlaceholder: 'janis@uznemums.lv',
+  company: 'Uzņēmums',
+  companyPlaceholder: 'Jūsu uzņēmums (neobligāti)',
+  topic: 'Jautājuma tēma',
+  topicPlaceholder: 'Izvēlieties tēmu...',
+  topics: [
+    { value: 'automation', label: 'Procesu automatizācija', icon: '⚙️' },
+    { value: 'ai', label: 'AI integrācija', icon: '🤖' },
+    { value: 'marketing', label: 'Mārketinga automatizācija', icon: '📣' },
+    { value: 'consulting', label: 'Vispārīga konsultācija', icon: '💼' },
+    { value: 'partnership', label: 'Partnerība', icon: '🤝' },
+    { value: 'other', label: 'Cits', icon: '💬' },
+  ],
+  message: 'Ziņojums',
+  messagePlaceholder: 'Pastāstiet par projektu, mērķiem vai uzdodiet jebkādus jautājumus...',
+  send: 'Nosūtīt',
+  sending: 'Sūta...',
+  required: '* Obligātie lauki',
+  successMessage: 'Jūsu ziņojums ir nosūtīts! Mēs sazināsimies ar jums 24 stundu laikā.',
+  errorMessage: 'Kaut kas nogāja greizi. Lūdzu, mēģiniet vēlreiz vai sazinieties ar mums tieši.',
+};
